@@ -31,23 +31,24 @@ object PlayerList: Runnable {
         val list = ArrayList<PlayerInfoData>()
 
         for (offlinePlayer in Bukkit.getOfflinePlayers().asSequence()) {
-            val profile = if (offlinePlayer is Player) WrappedGameProfile.fromPlayer(offlinePlayer)
-            else {
-                WrappedGameProfile.fromOfflinePlayer(offlinePlayer).withName(offlinePlayer.name)
-            }
+            val safeName = offlinePlayer.name ?: "Unknown"
+            val uuid = offlinePlayer.uniqueId
+
+            // fromOfflinePlayer -> 직접 생성자 사용 (GetId err)
+            val profile = WrappedGameProfile(uuid, safeName)
 
             list += PlayerInfoData(
-                    profile,
-                    0,
-                    EnumWrappers.NativeGameMode.NOT_SET,
-                    WrappedChatComponent.fromText(offlinePlayer.name)
+                profile,
+                0,
+                EnumWrappers.NativeGameMode.SURVIVAL,
+                WrappedChatComponent.fromText(safeName)
             )
         }
 
         // EnumSet(다중 액션) 사용.
         packet.playerInfoActions.write(0, EnumSet.of(
             EnumWrappers.PlayerInfoAction.ADD_PLAYER,
-            EnumWrappers.PlayerInfoAction.UPDATE_LISTED // 탭 리스트에 띄우기 위해 필요
+            EnumWrappers.PlayerInfoAction.UPDATE_LISTED
         ))
 
         packet.playerInfoDataLists.write(1, list)
@@ -58,7 +59,11 @@ object PlayerList: Runnable {
             if (player.hasPermission("aimless.bypass.tablist")) {
                 continue
             }
-            pm.sendServerPacket(player, packet)
+            try {
+                pm.sendServerPacket(player, packet)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
