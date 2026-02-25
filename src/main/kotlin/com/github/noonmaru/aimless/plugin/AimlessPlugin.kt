@@ -32,25 +32,25 @@ class AimlessPlugin : JavaPlugin() {
 
         server.pluginManager.registerEvents(EventListener(), this)
         server.scheduler.runTaskTimer(this, PlayerList, 0L , 1L)
-        server.scheduler.runTaskTimer(this, Restarter(), 20L * 60L, 20L * 60L)
+//        server.scheduler.runTaskTimer(this, Restarter(), 20L * 60L, 20L * 60L)
     }
 }
 
-class Restarter: Runnable {
-    private val time = System.currentTimeMillis()
-
-    override fun run() {
-        val elapsedTime = System.currentTimeMillis() - time
-
-        val restartTime = 1000L * 60L * 60L * 2L
-
-        if (elapsedTime >= restartTime) {
-            for (player in Bukkit.getOnlinePlayers()) {
-                player.sendMessage("서버가 재시작됩니다.")
-            }
-            Bukkit.shutdown()
-        } else if (elapsedTime >= restartTime - 60000L) {
-            Bukkit.broadcastMessage("1분 뒤 서버가 재시작됩니다.")
-        }
-    }
-}
+//class Restarter: Runnable {
+//    private val time = System.currentTimeMillis()
+//
+//    override fun run() {
+//        val elapsedTime = System.currentTimeMillis() - time
+//
+//        val restartTime = 1000L * 60L * 60L * 2L
+//
+//        if (elapsedTime >= restartTime) {
+//            for (player in Bukkit.getOnlinePlayers()) {
+//                player.sendMessage("서버가 재시작됩니다.")
+//            }
+//            Bukkit.shutdown()
+//        } else if (elapsedTime >= restartTime - 60000L) {
+//            Bukkit.broadcastMessage("1분 뒤 서버가 재시작됩니다.")
+//        }
+//    }
+//}
