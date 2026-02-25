@@ -44,12 +44,20 @@ object PlayerList: Runnable {
             )
         }
 
-        packet.playerInfoAction.write(0, EnumWrappers.PlayerInfoAction.ADD_PLAYER)
-        packet.playerInfoDataLists.write(0, list)
+        // EnumSet(다중 액션) 사용.
+        packet.playerInfoActions.write(0, EnumSet.of(
+            EnumWrappers.PlayerInfoAction.ADD_PLAYER,
+            EnumWrappers.PlayerInfoAction.UPDATE_LISTED // 탭 리스트에 띄우기 위해 필요
+        ))
+
+        packet.playerInfoDataLists.write(1, list)
 
         val pm = ProtocolLibrary.getProtocolManager()
 
         for (player in Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission("aimless.bypass.tablist")) {
+                continue
+            }
             pm.sendServerPacket(player, packet)
         }
     }

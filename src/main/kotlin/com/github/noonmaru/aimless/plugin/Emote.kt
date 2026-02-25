@@ -12,7 +12,7 @@ object Emote {
     init {
         register("angry", "화남")  {
             it.world.spawnParticle(
-                    Particle.VILLAGER_ANGRY,
+                    Particle.ANGRY_VILLAGER, // Particle 네이밍 변경에 따른 수정
                     it.x,
                     it.y + 2.0,
                     it.z,
@@ -105,17 +105,17 @@ object Emote {
         }
         register("no", "하지마")  {
             it.world.spawnParticle(
-                    Particle.BARRIER,
-                    it.x,
-                    it.y + 2.5,
-                    it.z,
-                    0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    null,
-                    true
+                Particle.BLOCK_MARKER, // Barrier particle 삭제 -> block marker 변경
+                it.x,
+                it.y + 2.5,
+                it.z,
+                0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                org.bukkit.Material.BARRIER.createBlockData(), // barrier particle 을 위해 값 변경
+                true
             )
 
             it.world.playSound(it, Sound.BLOCK_ANVIL_LAND, 0.5F, 0.1F)
