@@ -21,7 +21,7 @@ repositories {
 dependencies {
     // Kotlin 표준 라이브러리 (최신 버전 수정)
     implementation(kotlin("stdlib"))
-    testImplementation("junit:junit:4.12")
+    testImplementation("junit:junit:4.13.1")
 
     // Paper API (그룹 이름이 com.destroystokyo에서 io.papermc로 변경됨에 따른 수정)
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
