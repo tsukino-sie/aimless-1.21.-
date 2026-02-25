@@ -49,11 +49,13 @@ class EventListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun onTabComplete(event: TabCompleteEvent) {
+        if (event.sender.hasPermission("aimless.bypass.tabcomplete")) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onPlayerCommandPreprocess(event: PlayerCommandPreprocessEvent) {
+        if (event.player.hasPermission("aimless.bypass.command")) return
         event.isCancelled = true
 
         val message = event.message.removePrefix("/")
@@ -67,6 +69,7 @@ class EventListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
+        if (event.player.hasPermission("aimless.bypass.use-chat")) return
         event.isCancelled = true
 
         val message = event.message
@@ -89,7 +92,7 @@ class EventListener : Listener {
 
         event.numPlayers = c.get(Calendar.YEAR) * 10000 + (c.get(Calendar.MONTH) + 1) * 100 + c.get(Calendar.DAY_OF_MONTH)
         event.maxPlayers = c.get(Calendar.HOUR) * 10000 + c.get(Calendar.MINUTE) * 100 + c.get(Calendar.SECOND)
-        event.motd = "${ChatColor.of(Color(nextInt(0xFFFFFF)))}${ChatColor.BOLD}AIMLESS SERVER 2020"
+        event.motd = "${ChatColor.of(Color(nextInt(0xFFFFFF)))}${ChatColor.BOLD}AIMLESS SERVER 2026"
         event.playerSample.clear()
     }
 

@@ -1,7 +1,21 @@
 name: $pluginName
 main: $pluginMain
 depend: [Kotlin, ProtocolLib]
-api-version: '1.16'
+api-version: '1.21'
 version: $pluginVersion
 commands:
   aimless:
+
+permissions:
+  aimless.bypass.tabcomplete:
+    description: "명령어 자동완성 제한 우회"
+    default: false
+  aimless.bypass.command:
+    description: "명령어 사용 제한 우회"
+    default: false
+  aimless.bypass.use-chat:
+    description: "채팅 사용 제한 우회"
+    default: false
+  aimless.bypass.tablist:
+    description: "탭 가리기 우회"
+    default: false
