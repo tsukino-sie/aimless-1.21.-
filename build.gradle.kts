@@ -2,9 +2,8 @@ val pluginGroup: String by project
 val pluginName: String by project
 val pluginVersion: String by project
 val pluginMain: String by project
-
 plugins {
-    // 1. 코틀린 버전을 1.3에서 최신 버전(2.0.20)으로 대폭 올립니다.
+    // kotlin 1.3 -> 2.0.20 업데이트
     kotlin("jvm") version "2.0.20"
 }
 
