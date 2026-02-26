@@ -16,6 +16,7 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.dmulloy2.net/repository/public/") // ProtocolLib
     maven("https://jitpack.io/")
+    maven("https://libraries.minecraft.net/")
 }
 
 dependencies {
@@ -28,6 +29,7 @@ dependencies {
 
     // ProtocolLib 1.21.x 지원 버전(5.3.0)으로 업데이트
     compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
+    compileOnly("com.mojang:authlib:6.0.54")
 }
 
 kotlin {
