@@ -15,6 +15,10 @@ import java.util.*
  */
 class AimlessPlugin : JavaPlugin() {
     override fun onEnable() {
+        // 미니맵 모드 통신 채널 등록
+        server.messenger.registerOutgoingPluginChannel(this, "journeymap:common_network")
+        server.messenger.registerOutgoingPluginChannel(this, "xaero:minimap")
+        server.messenger.registerOutgoingPluginChannel(this, "xaero:worldmap")
         for (world in Bukkit.getWorlds()) {
             world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
             world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, true)
@@ -31,7 +35,9 @@ class AimlessPlugin : JavaPlugin() {
         }
 
         server.pluginManager.registerEvents(EventListener(), this)
-        server.scheduler.runTaskTimer(this, PlayerList, 0L , 1L)
+        PlayerList.registerInterceptor(this)
+        server.scheduler.runTaskTimer(this, PlayerList, 0L , 20L)
+//        server.scheduler.runTaskTimer(this, PlayerList, 0L , 1L)
 //        server.scheduler.runTaskTimer(this, Restarter(), 20L * 60L, 20L * 60L)
     }
 }

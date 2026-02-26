@@ -2,68 +2,93 @@ package com.github.noonmaru.aimless.plugin
 
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
+import com.comphenix.protocol.events.ListenerPriority
+import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketContainer
+import com.comphenix.protocol.events.PacketEvent
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.PlayerInfoData
 import com.comphenix.protocol.wrappers.WrappedChatComponent
 import com.comphenix.protocol.wrappers.WrappedGameProfile
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
+import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
-object PlayerList: Runnable {
+object PlayerList : Runnable {
 
-    private var update = false
+    fun registerInterceptor(plugin: JavaPlugin) {
+        ProtocolLibrary.getProtocolManager().addPacketListener(
+            object : PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Server.PLAYER_INFO) {
+                override fun onPacketSending(event: PacketEvent) {
+                    if (event.player.hasPermission("aimless.bypass.tablist")) return
 
-    fun update() {
-        update = true
+                    val packet = event.packet
+                    val actions = packet.playerInfoActions.read(0)
+
+                    val newActions = EnumSet.copyOf(actions)
+                    newActions.add(EnumWrappers.PlayerInfoAction.UPDATE_DISPLAY_NAME)
+                    packet.playerInfoActions.write(0, newActions)
+
+                    val dataList = packet.playerInfoDataLists.read(1)
+                    val newList = dataList.map { data ->
+                        val uuid = data.profileId
+                        val originalName = data.profile?.name ?: "Unknown"
+                        val maskedName = originalName.removeLang()
+
+                        val fakeProfile = WrappedGameProfile(uuid, maskedName)
+
+                        PlayerInfoData(
+                            uuid,
+                            data.latency,
+                            data.isListed,
+                            data.gameMode,
+                            fakeProfile,
+                            WrappedChatComponent.fromJson("{\"text\":\"$maskedName\"}")
+                        )
+                    }
+                    packet.playerInfoDataLists.write(1, newList)
+                }
+            }
+        )
     }
+
 
     override fun run() {
-        if (update) {
-            update = false
-            updatePlayerList()
-        }
-    }
+        val addList = ArrayList<PlayerInfoData>()
 
-    private fun updatePlayerList() {
-        val packet = PacketContainer(PacketType.Play.Server.PLAYER_INFO)
-        val list = ArrayList<PlayerInfoData>()
+        for (offlinePlayer in Bukkit.getOfflinePlayers()) {
+            if (offlinePlayer.isOnline) continue
 
-        for (offlinePlayer in Bukkit.getOfflinePlayers().asSequence()) {
-            val safeName = offlinePlayer.name ?: "Unknown"
             val uuid = offlinePlayer.uniqueId
+            val maskedName = (offlinePlayer.name ?: "Unknown").removeLang()
+            val fakeProfile = WrappedGameProfile(uuid, maskedName)
 
-            // fromOfflinePlayer -> 직접 생성자 사용 (GetId err)
-            val profile = WrappedGameProfile(uuid, safeName)
-
-            list += PlayerInfoData(
-                profile,
-                0,
+            addList += PlayerInfoData(
+                uuid,
+                0, // 핑 0
+                true,
                 EnumWrappers.NativeGameMode.SURVIVAL,
-                WrappedChatComponent.fromText(safeName)
+                fakeProfile,
+                WrappedChatComponent.fromJson("{\"text\":\"$maskedName\"}")
             )
         }
 
-        // EnumSet(다중 액션) 사용.
-        packet.playerInfoActions.write(0, EnumSet.of(
-            EnumWrappers.PlayerInfoAction.ADD_PLAYER,
-            EnumWrappers.PlayerInfoAction.UPDATE_LISTED
-        ))
+        if (addList.isEmpty()) return
 
-        packet.playerInfoDataLists.write(1, list)
+        val addPacket = PacketContainer(PacketType.Play.Server.PLAYER_INFO)
+        addPacket.playerInfoActions.write(0, EnumSet.of(
+            EnumWrappers.PlayerInfoAction.ADD_PLAYER,
+            EnumWrappers.PlayerInfoAction.UPDATE_LISTED,
+            EnumWrappers.PlayerInfoAction.UPDATE_DISPLAY_NAME
+        ))
+        addPacket.playerInfoDataLists.write(1, addList)
 
         val pm = ProtocolLibrary.getProtocolManager()
-
         for (player in Bukkit.getOnlinePlayers()) {
-            if (player.hasPermission("aimless.bypass.tablist")) {
-                continue
-            }
+            if (player.hasPermission("aimless.bypass.tablist")) continue
             try {
-                pm.sendServerPacket(player, packet)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+                pm.sendServerPacket(player, addPacket)
+            } catch (e: Exception) {}
         }
     }
 }
