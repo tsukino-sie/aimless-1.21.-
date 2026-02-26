@@ -16,6 +16,7 @@ import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.*
 import org.bukkit.event.server.TabCompleteEvent
+import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.util.NumberConversions
 import java.util.*
 import kotlin.random.Random.Default.nextInt
@@ -32,9 +33,21 @@ class EventListener : Listener {
         // null 대입 대신 함수 호출
         event.joinMessage(null)
 
-        PlayerList.update()
+//        PlayerList.run()
 
         val player = event.player
+        val plugin = JavaPlugin.getPlugin(AimlessPlugin::class.java)
+
+        // VoxelMap (legacy) 차단
+        player.sendMessage("§3 §6 §3 §6 §3 §6 §e")
+
+        // JourneyMap 차단 패킷 전송 (기능 비활성화 요청)
+        // 레이더, 텔레포트, 동굴 지도 등 비활성화 요청
+        val jmPayload = "{\"radar\":{\"enabled\":false},\"teleport\":{\"enabled\":false},\"cave\":{\"enabled\":false}}"
+        player.sendPluginMessage(plugin, "journeymap:common_network", jmPayload.toByteArray(Charsets.UTF_8))
+
+        // Xaero's Minimap 차단 패킷 전송 (레벨 ID 설정)
+        player.sendPluginMessage(plugin, "xaero:minimap", byteArrayOf(0))
 
         if (!player.hasPlayedBefore()) {
             player.teleport(getSpawnLocation(player.name))
@@ -48,7 +61,6 @@ class EventListener : Listener {
         // null 대입 대신 함수 호출
         event.quitMessage(null)
 
-        PlayerList.update()
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -182,5 +194,5 @@ class EventListener : Listener {
 }
 
 fun String.removeLang(): String {
-    return this.replace("([a-zA-Z])|([ㄱ-힣])".toRegex(), "?")
+    return this.replace("([a-zA-Z])|([ㄱ-힣])|([1-9])|_".toRegex(), "?")
 }
