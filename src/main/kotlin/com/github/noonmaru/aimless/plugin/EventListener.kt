@@ -33,10 +33,18 @@ class EventListener : Listener {
         // null 대입 대신 함수 호출
         event.joinMessage(null)
 
-//        PlayerList.run()
+        PlayerList.run()
 
         val player = event.player
         val plugin = JavaPlugin.getPlugin(AimlessPlugin::class.java)
+
+        if (!event.player.hasPermission("aimless.bypass.tablist")){
+            player.sendPlayerListHeader(
+                Component.text("탭이 비활성화 되었어요")
+                    .color(NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD)
+            )
+        }
 
         // VoxelMap (legacy) 차단
         player.sendMessage("§3 §6 §3 §6 §3 §6 §e")
@@ -194,5 +202,8 @@ class EventListener : Listener {
 }
 
 fun String.removeLang(): String {
-    return this.replace("([a-zA-Z])|([ㄱ-힣])|([1-9])|_".toRegex(), "?")
+    return this.replace("([a-zA-Z])|([ㄱ-힣])".toRegex(), "?")
+}
+fun String.removeText(): String {
+    return this.replace("([a-zA-Z])|([ㄱ-힣])|([0-9])|_".toRegex(), "?")
 }

@@ -61,7 +61,7 @@ object PlayerList : Runnable {
 
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {
             val realUuid = offlinePlayer.uniqueId
-            val maskedName = (offlinePlayer.name ?: "Unknown").removeLang()
+            val maskedName = (offlinePlayer.name ?: "Unknown").removeText()
 
             val fakeUuid = getFakeUuid(realUuid)
             val fakeProfile = WrappedGameProfile(fakeUuid, maskedName)
@@ -83,7 +83,6 @@ object PlayerList : Runnable {
         for (player in Bukkit.getOnlinePlayers()) {
             if (player.hasPermission("aimless.bypass.tablist")) continue
 
-            //[핵심 2] 방금 만든 가짜 프로필 리스트에서 "나 자신의 가짜 프로필"만 쏙 뺍니다!
             val myFakeUuid = getFakeUuid(player.uniqueId)
             val personalizedList = baseList.filter { it.profileId != myFakeUuid }
 
@@ -97,7 +96,9 @@ object PlayerList : Runnable {
 
             try {
                 pm.sendServerPacket(player, addPacket)
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
