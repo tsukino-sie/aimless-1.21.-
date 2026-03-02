@@ -22,6 +22,9 @@ import java.util.*
 import kotlin.random.Random.Default.nextInt
 
 class EventListener : Listener {
+
+    private val plugin = JavaPlugin.getPlugin(AimlessPlugin::class.java)
+
     @EventHandler
     fun onPlayerLogin(event: PlayerLoginEvent) {
         if (event.result == PlayerLoginEvent.Result.KICK_FULL)
@@ -94,21 +97,26 @@ class EventListener : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
-        if (event.player.hasPermission("aimless.bypass.use-chat")) return
-        event.isCancelled = true
-
         val message = event.message
         val emote = Emote.emoteBy(message)
 
         if (emote != null) {
-            emote.invoke(event.player.location)
 
-            // TextComponent(Bungee) -> Component(Adventure)
+            event.isCancelled = true
+            Bukkit.getScheduler().runTask(plugin, Runnable {
+                emote.invoke(event.player.location)
+            })
+
             val component = Component.text("[$message]")
                 .color(NamedTextColor.RED)
                 .clickEvent(ClickEvent.runCommand("/$message"))
 
             event.player.sendMessage(component)
+            return
+        }
+
+        if (!event.player.hasPermission("aimless.bypass.use-chat")) {
+            event.isCancelled = true
         }
     }
 
